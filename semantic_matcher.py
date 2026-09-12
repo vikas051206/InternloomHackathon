@@ -3,17 +3,27 @@ Semantic matching module using sentence embeddings.
 """
 
 from typing import List, Dict
-from sentence_transformers import SentenceTransformer
 import numpy as np
 from config import EMBEDDING_MODEL, TOP_K_CHUNKS
+
+try:
+    from sentence_transformers import SentenceTransformer
+    SEMANTIC_AVAILABLE = True
+except ImportError:
+    SEMANTIC_AVAILABLE = False
+    print("Warning: sentence-transformers not available. Semantic matching disabled.")
 
 
 class SemanticMatcher:
     """Match JD and resumes using semantic similarity."""
     
     def __init__(self):
-        print(f"Loading embedding model: {EMBEDDING_MODEL}")
-        self.model = SentenceTransformer(EMBEDDING_MODEL)
+        if SEMANTIC_AVAILABLE:
+            print(f"Loading embedding model: {EMBEDDING_MODEL}")
+            self.model = SentenceTransformer(EMBEDDING_MODEL)
+        else:
+            self.model = None
+            print("Semantic matching disabled - using keyword-only matching")
     
     def chunk_text(self, text: str, chunk_size: int = 3) -> List[str]:
         """
@@ -48,7 +58,7 @@ class SemanticMatcher:
         Returns:
             Numpy array of embeddings
         """
-        if not texts:
+        if not texts or not SEMANTIC_AVAILABLE or self.model is None:
             return np.array([])
         
         embeddings = self.model.encode(texts, show_progress_bar=False)

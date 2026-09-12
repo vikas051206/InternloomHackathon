@@ -30,17 +30,12 @@ class MongoDB:
             True if connection successful, False otherwise
         """
         try:
-            # Get credentials from environment
-            username = os.getenv("MONGODB_USERNAME")
-            password = os.getenv("MONGODB_PASSWORD")
-            cluster = os.getenv("MONGODB_CLUSTER", "cluster0.aofhzxk.mongodb.net")
+            # Get connection string from environment
+            connection_string = os.getenv("MONGODB_CONNECTION_STRING")
             
-            if not username or not password:
-                print("Warning: MongoDB credentials not found in environment variables")
+            if not connection_string:
+                print("Warning: MongoDB connection string not found in environment variables")
                 return False
-            
-            # Construct connection string
-            connection_string = f"mongodb+srv://{username}:{password}@{cluster}/?retryWrites=true&w=majority"
             
             # Connect to MongoDB
             self.client = MongoClient(connection_string, serverSelectionTimeoutMS=5000)
